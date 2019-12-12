@@ -42,10 +42,7 @@ router.post('/login', async (req, res) => {
 			if (decrptedPassword) {
 				const { _id, typeOfUser } = find
 				const tokenExpireIn = Math.floor(Date.now() / 1000) + 1800
-				const webToken = jsonwebtoken.sign(
-					{ _id, typeOfUser, exp: tokenExpireIn },
-					'InfoS'
-				)
+				const webToken = jsonwebtoken.sign({ _id, typeOfUser, exp: tokenExpireIn }, 'InfoS')
 				return res.json({
 					msg: 'Successful Login',
 					data: {
@@ -65,7 +62,7 @@ router.post('/login', async (req, res) => {
 
 router.post('/viewAllUsers', async (req, res) => {
 	try {
-		const allUsers = await User.find().select('username fullName typeOfUser')
+		const allUsers = await User.find().select('username fullName typeOfUser grades')
 		return res.json({ msg: 'Users Found', data: allUsers })
 	} catch (error) {
 		return res.status(500).send({ error: 'No users found' })
@@ -77,6 +74,16 @@ router.post('/viewUserById', tokenLecturerTa, async (req, res) => {
 		const id = req.body.id
 		const user = await User.findById(id).select('username fullName typeOfUser')
 		return res.json({ msg: 'User Found', data: user })
+	} catch (error) {
+		return res.status(500).send({ error: 'User not found' })
+	}
+})
+
+router.post('/viewMyProfile', token, async (req, res) => {
+	try {
+		const id = req.token.id
+		const user = await User.findById(id).select('username fullName typeOfUser grades')
+		return res.json({ msg: 'Your Profile', data: user })
 	} catch (error) {
 		return res.status(500).send({ error: 'User not found' })
 	}
@@ -94,9 +101,7 @@ router.post('/deleteUser', tokenLecturerTa, async (req, res) => {
 
 router.post('/viewStudents', tokenLecturerTa, async (req, res) => {
 	try {
-		const allStudents = await User.find({ typeOfUser: 'Student' }).select(
-			'username fullName typeOfUser'
-		)
+		const allStudents = await User.find({ typeOfUser: 'Student' }).select('username fullName typeOfUser')
 		return res.json({ msg: 'Students Found', data: allStudents })
 	} catch (error) {
 		return res.status(500).send({ error: 'No students found' })
@@ -105,9 +110,7 @@ router.post('/viewStudents', tokenLecturerTa, async (req, res) => {
 
 router.post('/viewLecturers', token, async (req, res) => {
 	try {
-		const allLecturers = await User.find({ typeOfUser: 'Lecturer' }).select(
-			'username fullName typeOfUser grades'
-		)
+		const allLecturers = await User.find({ typeOfUser: 'Lecturer' }).select('username fullName typeOfUser grades')
 		return res.json({ msg: 'Students Found', data: allLecturers })
 	} catch (error) {
 		return res.status(500).send({ error: 'No lecturers found' })
@@ -148,9 +151,7 @@ router.post('/addGrade', tokenLecturer, async (req, res) => {
 				}
 			}
 		)
-		const user = await User.findById(req.body.student).select(
-			'_id username fullName typeOfUser grades'
-		)
+		const user = await User.findById(req.body.student).select('_id username fullName typeOfUser grades')
 		return res.json({ msg: 'Grade Added Sucessfully', data: user })
 	} catch (error) {
 		return res.json({ error: error })
@@ -175,10 +176,8 @@ router.post('/updateGrade', tokenLecturer, async (req, res) => {
 				}
 			}
 		)
-		const user = await User.find({ 'grades._id': req.body.grade }).select(
-			'_id username fullName typeOfUser grades'
-		)
-		return res.json({ msg: 'Grade Added Sucessfully', data: user })
+		const user = await User.find({ 'grades._id': req.body.grade }).select('_id username fullName typeOfUser grades')
+		return res.json({ msg: 'Grade Updated Sucessfully', data: user })
 	} catch (error) {
 		return res.json({ error: error })
 	}

@@ -32,11 +32,7 @@ module.exports = {
 			fullName: Joi.string()
 				.min(3)
 				.max(200),
-			typeOfUser: Joi.string().valid([
-				'Lecturer',
-				'Student',
-				'TeacherAssistant'
-			])
+			typeOfUser: Joi.string().valid(['Lecturer', 'Student', 'TeacherAssistant'])
 		}
 		return Joi.validate(request, updateUser)
 	},
